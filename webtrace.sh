@@ -11,10 +11,12 @@ if [ ! -e $md5 ]; then
 fi
 while (true); do
   wget -q -O new.html $url
-  if [ "$(diff $md5 new.html)" != "" ]; then
+  difference=$(diff -y --suppress-common-lines $md5 new.html)
+  if [ $(echo $difference | wc -c) -gt 1 ]; then
     echo "got some difference"
-    rm $md5
-    mv new.html $md5
+    echo $difference
+    rm $md5; mv new.html $md5
+    git add $md5
     git commit -m "new contents of $url"
     git push
   else
